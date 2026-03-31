@@ -3,7 +3,7 @@ import os
 import zipfile
 import shutil
 
-def actualizar_ffmpeg_opera():
+def update_ffmpeg_opera():
     # Repository configuration
     owner = "nwjs-ffmpeg-prebuilt"
     repo = "nwjs-ffmpeg-prebuilt"
@@ -11,10 +11,10 @@ def actualizar_ffmpeg_opera():
     dest_path = "/usr/lib/x86_64-linux-gnu/opera-stable/libffmpeg.so"
     
     # 1. Get the latest Linux x64 release
-    print("Buscando la última versión para Linux x64...")
+    print("Looking for the latest Linux x64 version...")
     response = requests.get(api_url)
     if response.status_code != 200:
-        print("Error al conectar con GitHub.")
+        print("Error connecting to GitHub.")
         return
 
     assets = response.json().get('assets', [])
@@ -29,17 +29,17 @@ def actualizar_ffmpeg_opera():
             break
 
     if not download_url:
-        print("No se encontró un archivo compatible con Linux x64.")
+        print("No compatible file found for Linux x64.")
         return
 
     # 2. Download the file
-    print(f"Descargando {filename}...")
+    print(f"Downloading {filename}...")
     with requests.get(download_url, stream=True) as r:
         with open(filename, 'wb') as f:
             shutil.copyfileobj(r.raw, f)
 
     # 3. Extract the archive and search for libffmpeg.so
-    print("Extrayendo archivo...")
+    print("Extracting archive...")
     extract_dir = "temp_ffmpeg"
     with zipfile.ZipFile(filename, 'r') as zip_ref:
         zip_ref.extractall(extract_dir)
@@ -54,21 +54,21 @@ def actualizar_ffmpeg_opera():
     # 4. Move it to the destination path (requires sudo)
     if source_file:
         try:
-            print(f"Instalando en {dest_path}...")
+            print(f"Installing to {dest_path}...")
             # copy2 overwrites the destination file and preserves metadata
             shutil.copy2(source_file, dest_path)
-            print("¡Éxito! libffmpeg.so ha sido actualizado.")
+            print("Success! libffmpeg.so has been updated.")
         except PermissionError:
-            print("ERROR: Permiso denegado. Ejecuta el script con 'sudo'.")
+            print("ERROR: Permission denied. Run the script with 'sudo'.")
         except Exception as e:
-            print(f"Error inesperado: {e}")
+            print(f"Unexpected error: {e}")
     else:
-        print("No se encontró libffmpeg.so dentro del paquete descargado.")
+        print("libffmpeg.so was not found inside the downloaded package.")
 
     # 5. Cleanup
-    print("Limpiando archivos temporales...")
+    print("Cleaning up temporary files...")
     if os.path.exists(filename): os.remove(filename)
     if os.path.exists(extract_dir): shutil.rmtree(extract_dir)
 
 if __name__ == "__main__":
-    actualizar_ffmpeg_opera()
+    update_ffmpeg_opera()
